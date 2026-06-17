@@ -1,4 +1,6 @@
 procedure Hello is
 begin
+-- Comment 1	
 	Put_Line("Hello, world!");
+-- Comment 2           
 end Hello;

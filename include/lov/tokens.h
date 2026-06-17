@@ -13,6 +13,9 @@
 #define LOV_CHAR_LF (0x0A)
 #define LOV_CHAR_LPAREN (0x28)
 #define LOV_CHAR_RPAREN (0x29)
+#define LOV_CHAR_DBLQUOTE (0x22)
+#define LOV_CHAR_HYPHEN (0x2D)
+#define LOV_CHAR_MINUS LOV_CHAR_HYPHEN
 
 /* Token separators */
 #define LOV_TSCHAR_COLON LOV_CHAR_COLON
@@ -30,21 +33,6 @@
 #define LOV_ICHAR_CR LOV_CHAR_CR
 #define LOV_ICHAR_LF LOV_CHAR_LF
 
-/* Keywords */
-#define LOV_KWSTR_WITH "with"
-#define LOV_KWSTR_PROCEDURE "procedure"
-#define LOV_KWSTR_IS "is"
-#define LOV_KWSTR_BEGIN "begin"
-#define LOV_KWSTR_END "end"
-
-enum lov_kwcodes
-{
-	LOV_KW_WITH = 0,
-	LOV_KW_PROCEDURE,
-	LOV_KW_IS,
-	LOV_KW_BEGIN,
-	LOV_KW_END,
-	LOV_KW_COUNT
-};
+#define LOV_COMMENT_CHAR_SEQ "--"
 
 #endif /* LOV_TOKENS_H */

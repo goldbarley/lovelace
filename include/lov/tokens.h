@@ -1,0 +1,50 @@
+#ifndef LOV_TOKENS_H
+#define LOV_TOKENS_H
+
+#define LOV_MAX_TOKEN_SIZE (512U)
+#define LOV_MAX_STRTOK_SIZE (4096U)
+
+#define LOV_CHAR_COLON (0x3A)
+#define LOV_CHAR_SEMICOLON (0x3B)
+#define LOV_CHAR_EQUALS (0x3D)
+#define LOV_CHAR_SPACE (0x20)
+#define LOV_CHAR_HTAB (0x09)
+#define LOV_CHAR_CR (0x0D)
+#define LOV_CHAR_LF (0x0A)
+#define LOV_CHAR_LPAREN (0x28)
+#define LOV_CHAR_RPAREN (0x29)
+
+/* Token separators */
+#define LOV_TSCHAR_COLON LOV_CHAR_COLON
+#define LOV_TSCHAR_SEMICOLON LOV_CHAR_SEMICOLON
+#define LOV_TSCHAR_SPACE LOV_CHAR_SPACE
+#define LOV_TSCHAR_HTAB LOV_CHAR_HTAB
+#define LOV_TSCHAR_CR LOV_CHAR_CR
+#define LOV_TSCHAR_LF LOV_CHAR_LF
+#define LOV_TSCHAR_LPAREN LOV_CHAR_LPAREN
+#define LOV_TSCHAR_RPAREN LOV_CHAR_RPAREN
+
+/* Ignored characters */
+#define LOV_ICHAR_SPACE LOV_CHAR_SPACE
+#define LOV_ICHAR_HTAB LOV_CHAR_HTAB
+#define LOV_ICHAR_CR LOV_CHAR_CR
+#define LOV_ICHAR_LF LOV_CHAR_LF
+
+/* Keywords */
+#define LOV_KWSTR_WITH "with"
+#define LOV_KWSTR_PROCEDURE "procedure"
+#define LOV_KWSTR_IS "is"
+#define LOV_KWSTR_BEGIN "begin"
+#define LOV_KWSTR_END "end"
+
+enum lov_kwcodes
+{
+	LOV_KW_WITH = 0,
+	LOV_KW_PROCEDURE,
+	LOV_KW_IS,
+	LOV_KW_BEGIN,
+	LOV_KW_END,
+	LOV_KW_COUNT
+};
+
+#endif /* LOV_TOKENS_H */

@@ -1,0 +1,83 @@
+%{
+#include "attr.h"
+#include "dict.h"
+#include <stdint.h>
+%}
+struct lov_kw
+{
+	const char *kw;
+	int32_t kwcode;
+};
+%%
+abort, 1
+abs, 2
+abstract, 3
+accept, 4
+aliased, 5
+all, 6
+and, 7
+array, 8
+at, 9
+begin, 10
+body, 10
+case, 11
+constant, 12
+declare, 13
+delay, 14
+delta, 15
+digits, 16
+do, 17
+else, 18
+elsif, 19
+end, 20
+entry, 21
+exception, 22
+exit, 23
+for, 24
+function, 25
+generic, 26
+goto, 27
+if, 28
+in, 29
+interface, 30
+is, 31
+limited, 32
+loop, 33
+mod, 34
+new, 35
+not, 36
+null, 37
+of, 38
+or, 39
+others, 40
+out, 41
+overriding, 42
+package, 43
+parallel, 44
+pragma, 45
+private, 46
+procedure, 47
+protected, 48
+raise, 49
+range, 50
+record, 51
+rem, 52
+renames, 53
+requeue, 54
+return, 55
+reverse, 56
+select, 57
+separate, 58
+subtype, 59
+synchronised, 60
+tagged, 61
+task, 62
+terminate, 63
+then, 64
+type, 65
+until, 66
+use, 67
+when, 68
+while, 69
+with, 70
+xor, 71

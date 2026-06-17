@@ -1,4 +1,3 @@
-#include "lov/tokens.h"
 #ifdef _MSC_VER
 #define _CRT_SECURE_NO_WARNINGS
 #endif /* _MSC_VER */
@@ -14,6 +13,7 @@ lov_fnret lov_I_tokenise(FILE *file)
 {
 	register uint64_t tc = 0;
 	register int32_t ch;
+	int32_t nextch;
 	register uint32_t tbi = 0;
 	uint64_t toklen = 0;
 	register uint64_t ntok = 0;
@@ -23,21 +23,24 @@ lov_fnret lov_I_tokenise(FILE *file)
 	char strtokbuf[LOV_MAX_STRTOK_SIZE] = {0};
 	lov_bool instr = LOV_FALSE;
 	struct lov_kw *kw = NULL;
-	uint8_t hyphen_count = 0;
-	char cmntbuf[512] = {0};
+	lov_bool iscmnt = LOV_FALSE;
+	char dump[512] = {0};
 
 
 	while ((ch = fgetc(file)) != EOF)
 	{
 		if (ch == LOV_CHAR_HYPHEN)
 		{
-			++hyphen_count;
-			continue;
+			nextch = fgetc(file);
+			if (nextch == LOV_CHAR_HYPHEN)
+				iscmnt = LOV_TRUE;
+			else if (nextch != EOF)
+				fseek(file, -1, SEEK_CUR);
 		}
-		if (hyphen_count > 1)
+		if (iscmnt)
 		{
-			fgets(cmntbuf, 512 * sizeof(char), file);
-			hyphen_count = 0;
+			fgets(dump, 512 * sizeof(char), file);
+			iscmnt = LOV_FALSE;
 			continue;
 		}
 

@@ -17,7 +17,12 @@
 	((c) == LOV_TSCHAR_COLON || (c) == LOV_TSCHAR_SEMICOLON \
 		|| (c) == LOV_TSCHAR_CR || (c) == LOV_TSCHAR_HTAB \
 		|| (c) == LOV_TSCHAR_LF || (c) == LOV_TSCHAR_SPACE \
-		|| (c) == LOV_TSCHAR_LPAREN || (c) == LOV_TSCHAR_RPAREN)
+		|| (c) == LOV_TSCHAR_LPAREN || (c) == LOV_TSCHAR_RPAREN \
+		|| (c) == LOV_TSCHAR_HYPHEN || (c) == LOV_TSCHAR_COMMA \
+		|| (c) == LOV_TSCHAR_DOT || (c) == LOV_TSCHAR_PLUS \
+		|| (c) == LOV_TSCHAR_ASTERISK || (c) == LOV_TSCHAR_SLASH \
+		|| (c) == LOV_TSCHAR_LESSTHAN || (c) == LOV_TSCHAR_GREATERTHAN \
+		|| (c) == LOV_TSCHAR_AMPERSAND)
 
 LOV_INLINE
 lov_bool lov_ignore_char(char c)
@@ -32,7 +37,12 @@ lov_bool lov_tok_sep_char(char c)
 	return ((c) == LOV_TSCHAR_COLON || (c) == LOV_TSCHAR_SEMICOLON
 		|| (c) == LOV_TSCHAR_CR || (c) == LOV_TSCHAR_HTAB
 		|| (c) == LOV_TSCHAR_LF || (c) == LOV_TSCHAR_SPACE
-		|| (c) == LOV_TSCHAR_LPAREN || (c) == LOV_TSCHAR_RPAREN);
+		|| (c) == LOV_TSCHAR_LPAREN || (c) == LOV_TSCHAR_RPAREN
+		|| (c) == LOV_TSCHAR_HYPHEN || (c) == LOV_TSCHAR_COMMA
+		|| (c) == LOV_TSCHAR_DOT || (c) == LOV_TSCHAR_PLUS
+		|| (c) == LOV_TSCHAR_ASTERISK || (c) == LOV_TSCHAR_SLASH
+		|| (c) == LOV_TSCHAR_LESSTHAN || (c) == LOV_TSCHAR_GREATERTHAN
+		|| (c) == LOV_TSCHAR_AMPERSAND);
 }
 
 lov_fnret lov_tokenise(uint32_t count, const char **files);

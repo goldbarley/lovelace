@@ -7,7 +7,13 @@
 
 #include <stdint.h>
 
-#define lov_tokenize lov_tokenise
+#define lov_lx_tokenize lov_lx_tokenise
+
+enum lov_lx_state_bits
+{
+	LOV_LXS_STRTOK_BIT,
+	LOV_LXS_COMMENT_BIT,
+};
 
 #define LOV_IGNORE_CHAR(c) \
 	((c) == LOV_ICHAR_CR || (c) == LOV_ICHAR_HTAB || (c) == LOV_ICHAR_LF \
@@ -45,6 +51,7 @@ lov_bool lov_tok_sep_char(char c)
 		|| (c) == LOV_TSCHAR_AMPERSAND);
 }
 
-lov_fnret lov_tokenise(uint32_t count, const char **files);
+lov_fnret lov_lx_tokenise(uint32_t count, const char **files);
+int32_t lov_lx_comment(void);
 
 #endif /* LOV_LEXER_H */

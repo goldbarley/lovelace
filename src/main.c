@@ -7,7 +7,7 @@ int main(int argc, char *argv[])
 
 	lov_fnret ret = 0;
 
-	ret = lov_tokenise(argc - 1, (const char **)(&argv[1]));
+	ret = lov_lx_tokenise(argc - 1, (const char **)(&argv[1]));
 	if (ret != FR_SUCCESS)
 		return -1;
 

@@ -9,7 +9,42 @@
 #include <stdio.h>
 #include <string.h>
 
-lov_fnret lov_I_tokenise(FILE *file)
+#define LOV_LX_TOG_STATEBIT(bit) (Lov_Lexer_Info.state ^= 1 << (bit))
+#define LOV_LX_SET_STATEBIT(bit) (Lov_Lexer_Info.state |= 1 << (bit))
+#define LOV_LX_CLR_STATEBIT(bit) (Lov_Lexer_Info.state &= ~(1 << (bit)))
+#define LOV_LX_CHK_STATEBIT(bit) (Lov_Lexer_Info.state & (1 << (bit)))
+
+static struct
+{
+	FILE *file;
+	uint64_t state;
+} Lov_Lexer_Info = {0};
+
+int32_t lov_lx_comment()
+{
+	char fch = LOV_CHAR_HYPHEN;
+	register char nch = fgetc(Lov_Lexer_Info.file);
+	if (nch == EOF)
+	{
+		LOV_LX_CLR_STATEBIT(LOV_LXS_COMMENT_BIT);
+		return nch;
+	}
+
+	char dump[512] = {0};
+
+	if (fch == nch)
+	{
+		fgets(dump, 512 * sizeof(char), Lov_Lexer_Info.file);
+		LOV_LX_SET_STATEBIT(LOV_LXS_COMMENT_BIT);
+		return nch;
+	}
+
+	LOV_LX_CLR_STATEBIT(LOV_LXS_COMMENT_BIT);
+	ungetc(nch, Lov_Lexer_Info.file);
+	return nch;
+}
+
+lov_fnret lov_lxI_tokenise(void)
 {
 	register uint64_t tc = 0;
 	register int32_t ch;
@@ -21,33 +56,29 @@ lov_fnret lov_I_tokenise(FILE *file)
 	uint32_t stbi = 0;
 	uint64_t nstrtok = 0;
 	char strtokbuf[LOV_MAX_STRTOK_SIZE] = {0};
-	lov_bool instr = LOV_FALSE;
 	struct lov_kw *kw = NULL;
-	lov_bool iscmnt = LOV_FALSE;
 	char dump[512] = {0};
 
 
-	while ((ch = fgetc(file)) != EOF)
+	while ((ch = fgetc(Lov_Lexer_Info.file)) != EOF)
 	{
 		if (ch == LOV_CHAR_HYPHEN)
 		{
-			nextch = fgetc(file);
+			nextch = lov_lx_comment();
 			if (nextch == LOV_CHAR_HYPHEN)
-				iscmnt = LOV_TRUE;
-			else if (nextch != EOF)
-				fseek(file, -1, SEEK_CUR);
-		}
-		if (iscmnt)
-		{
-			fgets(dump, 512 * sizeof(char), file);
-			iscmnt = LOV_FALSE;
-			continue;
+			{
+				LOV_LX_CLR_STATEBIT(LOV_LXS_COMMENT_BIT);
+				continue;
+			}
+			else if (nextch == EOF)
+				break;
 		}
 
 		++tc;
 
-		instr = ch == LOV_CHAR_DBLQUOTE ? !instr : instr;
-		if (instr)
+		if (ch == LOV_CHAR_DBLQUOTE)
+			LOV_LX_TOG_STATEBIT(LOV_LXS_STRTOK_BIT);
+		if (LOV_LX_CHK_STATEBIT(LOV_LXS_STRTOK_BIT))
 		{
 			if (ch == LOV_CHAR_DBLQUOTE)
 				continue;
@@ -58,7 +89,7 @@ lov_fnret lov_I_tokenise(FILE *file)
 
 			continue;
 		}
-		else if (!instr && stbi)
+		else if (!LOV_LX_CHK_STATEBIT(LOV_LXS_STRTOK_BIT) && stbi)
 		{
 			++nstrtok;
 			strtokbuf[stbi] = 0;
@@ -108,18 +139,18 @@ lov_fnret lov_I_tokenise(FILE *file)
 	return FR_SUCCESS;
 }
 
-lov_fnret lov_tokenise(uint32_t count, const char **files)
+lov_fnret lov_lx_tokenise(uint32_t count, const char **files)
 {
-	FILE *file;
-
-	for (uint32_t i = 0; i < count; ++i)
+	lov_fnret ret = FR_SUCCESS;
+	for (uint32_t i = 0; i < count && ret == FR_SUCCESS; ++i)
 	{
-		file = fopen(files[i], "r");
-		if (!file)
+		memset(&Lov_Lexer_Info, 0, sizeof(Lov_Lexer_Info));
+		Lov_Lexer_Info.file = fopen(files[i], "r");
+		if (!Lov_Lexer_Info.file)
 			return FR_ERR_FAILURE;
-		lov_I_tokenise(file);
-		fclose(file);
+		ret = lov_lxI_tokenise();
+		fclose(Lov_Lexer_Info.file);
 	}
 
-	return FR_SUCCESS;
+	return ret;
 }

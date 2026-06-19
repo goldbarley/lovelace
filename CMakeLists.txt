@@ -13,6 +13,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_executable(${PROJECT_NAME} 
 	${CMAKE_CURRENT_SOURCE_DIR}/src/lexer.c
+	${CMAKE_CURRENT_SOURCE_DIR}/src/lx_stack.c
+	${CMAKE_CURRENT_SOURCE_DIR}/src/lxI_stack.c
 	${CMAKE_CURRENT_SOURCE_DIR}/src/main.c
 	${CMAKE_CURRENT_SOURCE_DIR}/src/perf_kw_hash.c)
 

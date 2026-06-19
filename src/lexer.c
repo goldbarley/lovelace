@@ -2,7 +2,6 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif /* _MSC_VER */
 
-#include "lov/debug.h"
 #include "lov/dict.h"
 #include "lov/lexer.h"
 
@@ -14,13 +13,17 @@
 #define LOV_LX_CLR_STATEBIT(bit) (Lov_Lexer_Info.state &= ~(1 << (bit)))
 #define LOV_LX_CHK_STATEBIT(bit) (Lov_Lexer_Info.state & (1 << (bit)))
 
-static struct
+struct lov_lx_ftokstack Lov_Final_Token_Stack = {0};
+
+static struct lov_lx_info
 {
 	FILE *file;
 	uint64_t state;
+	char tokbuf[LOV_MAX_TOKEN_SIZE];
+	char strtokbuf[LOV_MAX_STRTOK_SIZE];
 } Lov_Lexer_Info = {0};
 
-int32_t lov_lx_comment()
+int32_t lov_lx_comment(void)
 {
 	char fch = LOV_CHAR_HYPHEN;
 	register char nch = fgetc(Lov_Lexer_Info.file);
@@ -44,24 +47,46 @@ int32_t lov_lx_comment()
 	return nch;
 }
 
-lov_fnret lov_lxI_tokenise(void)
+uint64_t lov_lx_strtok(void)
+{
+	/* This function is only triggered if char = LOV_CHAR_DBLQUOTE. */
+
+	uint32_t stbi = 0;
+	int32_t ch = 0;
+
+	while ((ch = fgetc(Lov_Lexer_Info.file)) != EOF)
+	{
+		if (ch == LOV_CHAR_DBLQUOTE)
+			break;
+		Lov_Lexer_Info.strtokbuf[stbi++] = ch;
+	}
+
+	LOV_LX_CLR_STATEBIT(LOV_LXS_STRTOK_BIT);
+
+	return stbi;
+}
+
+static lov_fnret lov_lxI_tokenise(void)
 {
 	register uint64_t tc = 0;
 	register int32_t ch;
 	int32_t nextch;
+
 	register uint32_t tbi = 0;
 	uint64_t toklen = 0;
 	register uint64_t ntok = 0;
-	char tokbuf[LOV_MAX_TOKEN_SIZE] = {0};
-	uint32_t stbi = 0;
-	uint64_t nstrtok = 0;
-	char strtokbuf[LOV_MAX_STRTOK_SIZE] = {0};
-	struct lov_kw *kw = NULL;
-	char dump[512] = {0};
 
+	uint32_t stbi = 0;
+	uint64_t strtoklen = 0;
+	uint64_t nstrtok = 0;
+
+	struct lov_kw *kw = NULL;
+
+	char dump[512] = {0};
 
 	while ((ch = fgetc(Lov_Lexer_Info.file)) != EOF)
 	{
+		/* Comment */
 		if (ch == LOV_CHAR_HYPHEN)
 		{
 			nextch = lov_lx_comment();
@@ -76,26 +101,14 @@ lov_fnret lov_lxI_tokenise(void)
 
 		++tc;
 
+		/* Strings */
 		if (ch == LOV_CHAR_DBLQUOTE)
-			LOV_LX_TOG_STATEBIT(LOV_LXS_STRTOK_BIT);
-		if (LOV_LX_CHK_STATEBIT(LOV_LXS_STRTOK_BIT))
 		{
-			if (ch == LOV_CHAR_DBLQUOTE)
-				continue;
-
-			strtokbuf[stbi++] = ch;
-			if (stbi >= LOV_MAX_STRTOK_SIZE - 1)
-				return FR_ERR_BUFFER_OVERFLOW;
-
-			continue;
-		}
-		else if (!LOV_LX_CHK_STATEBIT(LOV_LXS_STRTOK_BIT) && stbi)
-		{
-			++nstrtok;
-			strtokbuf[stbi] = 0;
-			LOV_PRINT_STRTOK(strtokbuf);
-			stbi = 0;
-
+			LOV_LX_SET_STATEBIT(LOV_LXS_STRTOK_BIT);
+			strtoklen = lov_lx_strtok();
+			// LOV_PRINT_STRTOK(Lov_Lexer_Info.tokbuf);
+			lov_lx_fts_push(Lov_Lexer_Info.strtokbuf,
+				LOV_LX_TOKTYPE_STR);
 			continue;
 		}
 
@@ -107,16 +120,26 @@ lov_fnret lov_lxI_tokenise(void)
 			
 			if (tbi)
 			{
-				tokbuf[tbi] = 0;
-				toklen = strlen(tokbuf);
-				kw = lov_in_kw_set(tokbuf, toklen);
-				if (!kw)
-					LOV_PRINT_IDENT(tokbuf);
-				else
-					LOV_PRINT_KW(tokbuf);
+				Lov_Lexer_Info.tokbuf[tbi] = 0;
+				toklen = strlen(Lov_Lexer_Info.tokbuf);
+				kw = lov_in_kw_set(Lov_Lexer_Info.tokbuf,
+					toklen);
+				// if (!kw)
+				// 	LOV_PRINT_IDENT(Lov_Lexer_Info.tokbuf);
+				// else
+				// 	LOV_PRINT_KW(Lov_Lexer_Info.tokbuf);
+
+				lov_lx_fts_push(Lov_Lexer_Info.tokbuf,
+					LOV_LX_TOKTYPE_STD);
 				tbi = 0;
 				if (!lov_ignore_char(ch))
-					LOV_PRINT_TOK_SEP(ch);
+				{
+					// LOV_PRINT_TOK_SEP_CHAR(ch);
+					lov_lx_fts_push(
+						(char []){ch, 0},
+						LOV_LX_TOKTYPE_STD
+					);
+				}
 
 				continue;
 			}
@@ -127,7 +150,7 @@ lov_fnret lov_lxI_tokenise(void)
 
 		if (tbi >= LOV_MAX_TOKEN_SIZE - 1)
 			return FR_ERR_BUFFER_OVERFLOW;
-		tokbuf[tbi++] = ch;
+		Lov_Lexer_Info.tokbuf[tbi++] = ch;
 	}
 
 	puts("");
